@@ -25,7 +25,7 @@ var slack = {
         }
 
         if (typeof config.url === 'undefined') {
-            console.error('url must be set');
+            // console.error('url must be set');
             return;
         }
 
@@ -40,20 +40,20 @@ var slack = {
             url:         'https://slack.com/api' + config.url,
             data:        config.data,
             contentType: 'application/x-www-form-urlencoded',
+            charset:     'utf-8'
             success:     config.success,
             error:       config.error,
             complete:    config.complete,
         });
     },
     status: function(config) {
-        console.log("calling slack.status");
-        console.log(config);
+        // save this as a POST function
         if (typeof config === 'undefined') {
             config = {};
         }
 
         if (typeof config.url === 'undefined') {
-            console.error('url must be set');
+            // console.error('url must be set');
             return;
         }
 
@@ -62,17 +62,23 @@ var slack = {
         }
 
         config.data.token = slackToken;
+        config.data = JSON.stringify(config.data)
 
         $.ajax({
             method:      config.method || 'GET',
             url:         'https://slack.com/api' + config.url,
             data:        config.data,
-            contentType: 'application/x-www-form-urlencoded',
+            contentType: config.contentType || 'application/x-www-form-urlencoded',
+            // profile:     config.data.profile,
             status_text: config.status_text,
             status_emoji:config.status_emoji,
             success:     config.success,
             error:       config.error,
             complete:    config.complete,
+            beforeSend:  function (xhr) {
+                xhr.setRequestHeader("Authorization", "Bearer " + slackToken);
+            },
+
         });
     },
 };

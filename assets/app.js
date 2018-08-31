@@ -1,6 +1,7 @@
 var url='https://connect.datto.net/ajax/queue/status?column=default&sort=default&queueID=93'
 var myObj
 var status = ''
+var slacker = ''
 var slackToken = '';
 
 
@@ -23,43 +24,73 @@ sendAjax()
 
 
 function pullStatus (response) {
-    // console.log(response);
     var agentList = response.agents
-    // console.log(agentList);
     for (var agent in agentList) {
-        //console.log(agentList[agent].name);
-        if (agentList[agent].name == 'Jason Dale') {
-            console.log(agentList[agent]);
-            // console.log("its me");
+        if (agentList[agent].name == usersName) {
+            slacker = agentList[agent].name
             status = agentList[agent].status;
-            console.log(status);
-            $('#demo').html(status)
-            changeSlackStatus(status)
         }
     }
+    $('#phoneStatus').html(status)
+    getSlackStatus(slacker)
+    changeSlackStatus(status)
+}
+
+function getSlackStatus(slackUser) {
+    var configData = {
+        method: 'GET',
+        // contentType: 'application/json',
+        url: '/users.profile.get',
+        data: {
+            user: "U3CA8TSUS",
+        },
+        success: statusGetSuccess,
+        complete: statusGetComplete,
+    }
+    slack.call(configData)
+
+    // $('#functionName').html(slackStatus)
+
+}
+const test = function() {
+  console.log("test");
+  // this is calling over and over as fast as possible,
+  // not respecting setTimeout. to be looked into...
+  // statusGetComplete()
+}
+
+const statusGetSuccess = function(data) {
+    console.log(data);
+    var currentStatus = data.profile.status_text
+    $('#currentStatus').html(currentStatus)
+}
+const statusGetComplete = function(data) {
+    // setTimeout(getSlackStatus(slacker), 100000);
+    setTimeout(test(), 10000)
 }
 
 function changeSlackStatus(status) {
-    console.log(status);
+    // console.log(status);
     var configData = {
         method: 'POST',
+        contentType: 'application/json',
         url: '/users.profile.set',
         data: {
             user: "U3CA8TSUS",
             profile: {
                 status_text: status,
-                status_emoji: ":mountain_railway:"
+                status_emoji: ":phone:"
             },
         },
         success: statusSuccess,
         complete: statusComplete,
-        }
-        console.log(slack.status(configData))
+    }
+    slack.status(configData)
 }
 
-const statusSuccess = function() {
-    console.log("success");
+const statusSuccess = function(data) {
+    console.log(data);
 }
-const statusComplete = function() {
-    console.log('complete');
+const statusComplete = function(data) {
+    // console.log(data);
 }
